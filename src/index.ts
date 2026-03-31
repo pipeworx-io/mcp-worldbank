@@ -1,3 +1,18 @@
+interface McpToolDefinition {
+  name: string;
+  description: string;
+  inputSchema: {
+    type: 'object';
+    properties: Record<string, unknown>;
+    required?: string[];
+  };
+}
+
+interface McpToolExport {
+  tools: McpToolDefinition[];
+  callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>;
+}
+
 /**
  * World Bank MCP — wraps the World Bank Data API v2 (free, no auth)
  *
@@ -16,20 +31,6 @@
  *   SI.POV.GINI     — Gini index
  */
 
-interface McpToolDefinition {
-  name: string;
-  description: string;
-  inputSchema: {
-    type: 'object';
-    properties: Record<string, unknown>;
-    required?: string[];
-  };
-}
-
-interface McpToolExport {
-  tools: McpToolDefinition[];
-  callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>;
-}
 
 const BASE_URL = 'https://api.worldbank.org/v2';
 
