@@ -1,0 +1,17 @@
+{
+  "name": "@pipeworx/mcp-worldbank",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "MCP server for World Bank data — country stats, GDP, population, and development indicators",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "pipeworx",
+    "worldbank"
+  ],
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
