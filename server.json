@@ -2,20 +2,13 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.pipeworx-io/worldbank",
   "title": "Worldbank",
-  "description": "World Bank MCP \u2014 wraps the World Bank Data API v2 (free, no auth)",
-  "version": "0.1.0",
+  "description": "World Bank MCP — wraps the World Bank Data API v2 (free, no auth)",
+  "version": "0.1.1",
   "websiteUrl": "https://pipeworx.io/packs/worldbank",
   "repository": {
     "url": "https://github.com/pipeworx-io/mcp-worldbank",
     "source": "github"
   },
-  "packages": [
-    {
-      "registryType": "npm",
-      "identifier": "@pipeworx/mcp-worldbank",
-      "version": "0.1.0"
-    }
-  ],
   "remotes": [
     {
       "type": "streamable-http",
