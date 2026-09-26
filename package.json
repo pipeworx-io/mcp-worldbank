@@ -1,6 +1,6 @@
 {
   "name": "@pipeworx/mcp-worldbank",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "World Bank MCP — wraps the World Bank Data API v2 (free, no auth)",
   "type": "module",
   "main": "src/index.ts",
@@ -26,7 +26,7 @@
     "@cloudflare/workers-types": "^4.20260405.1"
   },
   "pipeworx": {
-    "sourceHash": "v1-73ee8cf435e418d17342e6764125e2e9e15864a27ec85ae5e329e51d264aac4b",
-    "sourceCommit": "b0fb3c31386cf0256dcf1e2f1b3440435a87ec35"
+    "sourceHash": "v1-f54e3c22bf2aaafdd229d226bbdd6ba6f5d0308cc4aad4fa4850f9e8aa456d5b",
+    "sourceCommit": "2cb50b368da3267446f2b6f6a3ddbd3d0eed3d73"
   }
 }
