@@ -2,7 +2,7 @@
 
 The World Bank Open Data API. Thousands of development, economic, social, and demographic indicators for every country. Time series going back decades. The canonical source for cross-country comparisons of poverty, education, health, gender, environment, infrastructure. Free, no auth.
 
-Part of [Pipeworx](https://pipeworx.io) — an MCP gateway connecting AI agents to 1684+ live data sources.
+Part of [Pipeworx](https://pipeworx.io) — an MCP gateway connecting AI agents to 1831+ live data sources. This is an independent, unofficial integration — not affiliated with, endorsed by, or published by the upstream provider.
 
 ## Why this matters for AI agents
 
@@ -45,6 +45,21 @@ World Bank uses ISO 3-letter codes (USA, BRA, IND) plus aggregate codes:
 - `SSA` — Sub-Saharan Africa
 
 Aggregate codes are useful for "how does X compare to its peer group?" questions.
+
+## Worldwide Governance Indicators (WGI)
+
+The World Bank also publishes the Worldwide Governance Indicators — six governance-quality dimensions per country, useful as country-risk context alongside event/news data: Voice and Accountability, Political Stability and Absence of Violence/Terrorism, Government Effectiveness, Regulatory Quality, Rule of Law, and Control of Corruption. These live in a separate World Bank source database from the general development indicators above, under codes like `GOV_WGI_CC.EST` (Control of Corruption, governance estimate) and `GOV_WGI_CC.SC` (same dimension, 0–100 percentile-style score) — reachable through this pack's existing `get_indicator` / `compare_countries` tools, but unguessable without knowing the code, so use the dedicated `get_governance_indicators` tool for a single country's full six-dimension snapshot (latest year + prior year, for trend).
+
+| Dimension | `.EST` code |
+|---|---|
+| Voice and Accountability | `GOV_WGI_VA.EST` |
+| Political Stability and Absence of Violence/Terrorism | `GOV_WGI_PV.EST` |
+| Government Effectiveness | `GOV_WGI_GE.EST` |
+| Regulatory Quality | `GOV_WGI_RQ.EST` |
+| Rule of Law | `GOV_WGI_RL.EST` |
+| Control of Corruption | `GOV_WGI_CC.EST` |
+
+Each `.EST` estimate runs approximately -2.5 (weakest) to +2.5 (strongest); the matching `.SC` code is a 0–100 percentile-style score, higher meaning stronger governance relative to other countries scored that year.
 
 ## Common pitfalls
 
@@ -99,7 +114,7 @@ directly, instead of just this one's:
 }
 ```
 
-Both URLs reach the same gateway and the same 1684+ data sources. The
+Both URLs reach the same gateway and the same 1831+ data sources. The
 only difference is which pack's tools are listed **directly**; `ask_pipeworx`
 reaches all of them from either one.
 

@@ -696,6 +696,16 @@ function collapse(s: string): string {
  * Those codes were recommended in this pack's OWN tool descriptions until
  * 2026-07-29, which sent agents to a dead series. The live replacement is the
  * AR5 family (EN.GHG.*), sourced from Climate Watch/PIK, current through 2024.
+ *
+ * - get_governance_indicators: World Bank, Worldwide Governance Indicators
+ *   (WGI) — six governance-quality dimensions per country (fleet #3267,
+ *   country-risk context alongside gdelt). SAME keyless api.worldbank.org/v2
+ *   endpoint this pack already calls (sourceid 3 rather than the default WDI
+ *   source), confirmed live 2026-10-17.
+ *   Dupe-check: `get_indicator`/`compare_countries` could already reach these
+ *   codes (e.g. "GOV_WGI_CC.EST") once you knew them, but nothing in this pack
+ *   named them, so no agent would ever guess "GOV_WGI_CC.EST" unprompted. This
+ *   is the alias/discoverability fix plus one aggregating tool, not a new pack.
  */
 
 
@@ -729,7 +739,7 @@ const tools: McpToolExport['tools'] = [
   {
     name: 'get_indicator',
     description:
-      'Get World Bank time-series data — economic, social, and development statistics — for ANY country worldwide (Spain, Brazil, Germany, Nigeria, Japan, etc.). PREFER for "unemployment rate in <country>", "<country> inflation rate", "GDP of <country>", "<country> population / life expectancy / poverty rate / CO2 emissions". Pass the ISO country code + a World Bank indicator code; common ones: GDP=NY.GDP.MKTP.CD, GDP per capita=NY.GDP.PCAP.CD, inflation=FP.CPI.TOTL.ZG, unemployment=SL.UEM.TOTL.ZS, population=SP.POP.TOTL, life expectancy=SP.DYN.LE00.IN, poverty rate=SI.POV.DDAY, literacy=SE.ADT.LITR.ZS. For CO2 use the dedicated country_co2_emissions tool (the old EN.ATM.CO2E.* codes were DELETED by the World Bank; the live series is EN.GHG.CO2.MT.CE.AR5). (Annual data — a national statistics office may have fresher monthly figures.)',
+      'Get World Bank time-series data — economic, social, and development statistics — for ANY country worldwide (Spain, Brazil, Germany, Nigeria, Japan, etc.). PREFER for "unemployment rate in <country>", "<country> inflation rate", "GDP of <country>", "<country> population / life expectancy / poverty rate / CO2 emissions". Pass the ISO country code + a World Bank indicator code; common ones: GDP=NY.GDP.MKTP.CD, GDP per capita=NY.GDP.PCAP.CD, inflation=FP.CPI.TOTL.ZG, unemployment=SL.UEM.TOTL.ZS, population=SP.POP.TOTL, life expectancy=SP.DYN.LE00.IN, poverty rate=SI.POV.DDAY, literacy=SE.ADT.LITR.ZS. For CO2 use the dedicated country_co2_emissions tool (the old EN.ATM.CO2E.* codes were DELETED by the World Bank; the live series is EN.GHG.CO2.MT.CE.AR5). For governance/corruption/rule-of-law/political-stability use the dedicated get_governance_indicators tool (Worldwide Governance Indicators, codes like GOV_WGI_CC.EST). (Annual data — a national statistics office may have fresher monthly figures.)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -783,7 +793,7 @@ const tools: McpToolExport['tools'] = [
   {
     name: 'compare_countries',
     description:
-      'Compare a World Bank indicator across MULTIPLE countries in one call, returned ranked high→low. PREFER for "GDP per capita: US vs China vs Germany", "rank the G7 by CO2 emissions", "compare population of <countries>". Pass 2+ ISO country codes. Defaults to each country\'s most-recent available value; pass a year for a specific year. Common indicators: NY.GDP.MKTP.CD (GDP), NY.GDP.PCAP.CD (GDP per capita), SP.POP.TOTL (population), EN.GHG.CO2.MT.CE.AR5 (CO2, Mt), FP.CPI.TOTL.ZG (inflation %). For CO2 rankings prefer country_co2_emissions, which knows the right series.',
+      'Compare a World Bank indicator across MULTIPLE countries in one call, returned ranked high→low. PREFER for "GDP per capita: US vs China vs Germany", "rank the G7 by CO2 emissions", "compare population of <countries>", "rank <countries> by rule of law / corruption / government effectiveness". Pass 2+ ISO country codes. Defaults to each country\'s most-recent available value; pass a year for a specific year. Common indicators: NY.GDP.MKTP.CD (GDP), NY.GDP.PCAP.CD (GDP per capita), SP.POP.TOTL (population), EN.GHG.CO2.MT.CE.AR5 (CO2, Mt), FP.CPI.TOTL.ZG (inflation %), GOV_WGI_CC.EST / GOV_WGI_RL.EST / GOV_WGI_GE.EST / GOV_WGI_RQ.EST / GOV_WGI_PV.EST / GOV_WGI_VA.EST (Worldwide Governance Indicators — corruption, rule of law, government effectiveness, regulatory quality, political stability, voice & accountability). For CO2 rankings prefer country_co2_emissions; for a single country\'s full governance profile prefer get_governance_indicators.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -826,6 +836,21 @@ const tools: McpToolExport['tools'] = [
         },
       },
       required: ['country_codes'],
+    },
+  },
+  {
+    name: 'get_governance_indicators',
+    description:
+      'World Bank, Worldwide Governance Indicators (WGI) — six governance-quality dimensions for ANY country: Voice and Accountability, Political Stability and Absence of Violence/Terrorism, Government Effectiveness, Regulatory Quality, Rule of Law, and Control of Corruption. PREFER for "how corrupt is <country>", "rule of law in <country>", "political stability of <country>", "government effectiveness <country>", "governance quality <country>", or as country-risk context alongside news-event data. Pass one ISO country code; returns the latest year available plus the prior year for trend, for all six dimensions, each as a governance estimate (-2.5 weakest to +2.5 strongest) and a percentile-style score (0-100, higher = stronger governance relative to other countries that year).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        country_code: {
+          type: 'string',
+          description: 'ISO country code (e.g., "US", "GBR", "CN").',
+        },
+      },
+      required: ['country_code'],
     },
   },
 ];
@@ -888,6 +913,11 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<un
           'Pass one or more ISO country codes, e.g. country_co2_emissions({country_codes: "BR"}) or ({country_codes: "US,CN,IN"}).'),
         (args.date_range as string) || '2015:2024',
         args.per_capita === true || args.per_capita === 'true',
+      );
+    case 'get_governance_indicators':
+      return getGovernanceIndicators(
+        requireArg(argAlias(args, COUNTRY_ALIASES), 'country_code',
+          'Pass an ISO country code, e.g. get_governance_indicators({country_code: "BR"}).'),
       );
     default:
       throw new Error(`Unknown tool: ${name}`);
@@ -1251,6 +1281,85 @@ async function compareCountries(countryCodes: string, indicator: string, year?: 
     count: ranking.length,
     ...(singleCountry ? { note: 'Single country given — returning its value rather than a comparison. Pass 2+ codes (e.g. "VN,TH") to rank countries against each other.' } : {}),
     ranking,
+  };
+}
+
+/**
+ * Worldwide Governance Indicators (WGI) — published by the World Bank, sourced
+ * from sourceid 3 in this same api.worldbank.org/v2 API (distinct from the
+ * default World Development Indicators source this pack otherwise queries).
+ * Six governance dimensions, each carrying a `.EST` governance estimate
+ * (approx. -2.5 to +2.5) and a `.SC` percentile-style score (0-100). Both
+ * confirmed live 2026-10-17 (e.g. GOV_WGI_CC.EST / GOV_WGI_CC.SC for "US").
+ * Publisher + dataset: World Bank, Worldwide Governance Indicators.
+ */
+const WGI_DIMENSIONS: { code: string; label: string }[] = [
+  { code: 'VA', label: 'Voice and Accountability' },
+  { code: 'PV', label: 'Political Stability and Absence of Violence/Terrorism' },
+  { code: 'GE', label: 'Government Effectiveness' },
+  { code: 'RQ', label: 'Regulatory Quality' },
+  { code: 'RL', label: 'Rule of Law' },
+  { code: 'CC', label: 'Control of Corruption' },
+];
+
+async function getGovernanceIndicators(countryCode: string) {
+  const dateRange = '2012:2026';
+
+  const perDimension = await Promise.all(
+    WGI_DIMENSIONS.map(async (dim) => {
+      const [est, sc] = await Promise.all([
+        fetchSeries([countryCode], `GOV_WGI_${dim.code}.EST`, dateRange),
+        fetchSeries([countryCode], `GOV_WGI_${dim.code}.SC`, dateRange),
+      ]);
+
+      const estRows = est.rows
+        .filter((r) => r.value !== null && r.value !== undefined)
+        .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
+      const scByYear = new Map(
+        sc.rows.filter((r) => r.value !== null && r.value !== undefined).map((r) => [r.date, r.value as number]),
+      );
+
+      const latest = estRows[0];
+      const prior = estRows[1];
+
+      return {
+        dimension: dim.label,
+        indicator_id: `GOV_WGI_${dim.code}.EST`,
+        latest_year: latest?.date ?? null,
+        estimate: latest?.value ?? null,
+        percentile_score: latest?.date ? scByYear.get(latest.date) ?? null : null,
+        prior_year: prior?.date ?? null,
+        prior_estimate: prior?.value ?? null,
+        country: latest?.country?.value ?? null,
+        iso3: latest?.countryiso3code ?? null,
+      };
+    }),
+  );
+
+  const withData = perDimension.find((d) => d.estimate !== null);
+  if (!withData) {
+    throw new Error(
+      `user_error: No Worldwide Governance Indicators data found for "${countryCode}". Check the ISO country code — ` +
+      `use get_country to verify it resolves, e.g. get_governance_indicators({country_code: "BR"}).`,
+    );
+  }
+
+  return {
+    country: withData.country ?? countryCode.toUpperCase(),
+    iso3: withData.iso3 ?? null,
+    latest_year: withData.latest_year,
+    scale:
+      'estimate: approx. -2.5 (weakest) to +2.5 (strongest) governance; percentile_score: 0-100, higher = stronger governance relative to all countries scored that year',
+    dimension_count: perDimension.length,
+    dimensions: perDimension.map(({ dimension, indicator_id, latest_year, estimate, percentile_score, prior_year, prior_estimate }) => ({
+      dimension,
+      indicator_id,
+      latest_year,
+      estimate,
+      percentile_score,
+      prior_year,
+      prior_estimate,
+    })),
   };
 }
 
