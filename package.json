@@ -1,12 +1,20 @@
 {
   "name": "@pipeworx/mcp-worldbank",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "World Bank MCP — wraps the World Bank Data API v2 (free, no auth)",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./tools.json": "./tools.json",
+    "./package.json": "./package.json"
+  },
   "bin": {
     "mcp-worldbank": "bin/cli.js"
+  },
+  "files": ["bin/", "lib/", "tools.json", "server.json"],
+  "engines": {
+    "node": ">=18"
   },
   "keywords": ["mcp", "mcp-server", "model-context-protocol", "pipeworx", "worldbank"],
   "license": "MIT",
@@ -14,19 +22,12 @@
     "type": "git",
     "url": "git+https://github.com/pipeworx-io/mcp-worldbank.git"
   },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
-    "tsx": "^4.19.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3",
-    "@cloudflare/workers-types": "^4.20260405.1"
-  },
+  "mcpName": "io.github.pipeworx-io/worldbank",
   "pipeworx": {
-    "sourceHash": "v1-8b59ab9bbe163ac6fbd08d1b356ebf7a1412fcf811a7426c7645030893c6e838",
-    "sourceCommit": "514e3efb42b8d81082c07e01d3ae7654bbf91f52"
+    "mode": "gateway",
+    "slug": "worldbank",
+    "gatewaySlug": "worldbank",
+    "sourceHash": "v1-713f73cdffcf70214fff6898ea398ee784de55acece41e790fde3ccfd2eb476e",
+    "sourceCommit": "98853f34516646cb7c4c1460f09249b262c0269e"
   }
 }
